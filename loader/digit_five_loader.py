@@ -21,13 +21,13 @@ class DigitFive():
         self.train_mode = train_mode
         self.transform = {
             'train': transforms.Compose([                
-                transforms.Resize(224),
-                transforms.RandomHorizontalFlip(),
+                transforms.Resize(28),
+                transforms.RandomResizedCrop(28),
                 transforms.ToTensor(),
                 transforms.Normalize([0.656,0.487,0.411], [1., 1., 1.])
             ]),
             'val': transforms.Compose([
-                transforms.Resize(224),
+                transforms.Resize(28),
                 transforms.ToTensor(),
                 transforms.Normalize([0.656,0.487,0.411], [1., 1., 1.])
             ]),
@@ -62,27 +62,27 @@ class DigitFive():
 
             case 'mnistm':
                 mat = sio.loadmat(f'{self.path}mnistm_with_label.mat')
-                data = (np.array((self.toRGB(mat['train_28'].squeeze()))).astype('float32')).transpose(1,2,0,3)
+                data = (np.array(mat['train'].squeeze()).astype('float32')).transpose(1,2,0,3)
                 target = np.argmax((mat['label_train']), axis = 1)
                 opt_data =[data, target]
 
-            # case 'usps':
-            #     mat = sio.loadmat(f'{self.path}usps_28x28.mat')
-            #     data = np.transpose((np.array((tf.image.grayscale_to_rgb(tf.convert_to_tensor(mat['dataset'][0][0].reshape(-1,28,28,1))))).astype('float32')).reshape(-1,28,28,3), (0,3,1,2))
-            #     target = mat['dataset'][0][1].flatten()
-            #     opt_data = [data, target]
+            case 'usps':
+                mat = sio.loadmat(f'{self.path}usps_28x28.mat')
+                data = np.array((self.toRGB(mat['dataset'][0][0].reshape(-1,28,28,1))).astype('float32')).transpose(1,2,0,3)
+                target = mat['dataset'][0][1].flatten()
+                opt_data = [data, target]
 
-            # case 'svhn':
-            #     mat = sio.loadmat(f'{self.path}svhn_train_32x32.mat')
-            #     data = np.transpose((np.array((tf.image.resize(np.moveaxis(mat['X'], -1, 0),  [28,28]) )).astype('float32')/255.0).reshape(-1,28,28,3), (0,3,1,2))
-            #     target = (mat['y']-1).flatten()
-            #     opt_data = [data, target]
+            case 'svhn':
+                mat = sio.loadmat(f'{self.path}svhn_train_32x32.mat')
+                data = (np.array(mat['X'].squeeze()).astype('float32')).transpose(1,2,0,3)
+                target = (mat['y']-1).flatten()
+                opt_data = [data, target]
 
-            # case 'syn':
-            #     mat = sio.loadmat(f'{self.path}syn_number.mat')
-            #     data = np.transpose((np.array((tf.image.resize(mat['train_data'], [28,28]) )).astype('float32')/255.0).reshape(-1,28,28,3), (0,3,1,2)) 
-            #     target = mat['train_label'].flatten()
-            #     opt_data = [data, target]
+            case 'syn':
+                mat = sio.loadmat(f'{self.path}syn_number.mat')
+                data = (np.array(mat['train_data'].squeeze()).astype('float32')).transpose(1,2,0,3)
+                target = mat['train_label'].flatten()
+                opt_data = [data, target]
 
         return opt_data
 
