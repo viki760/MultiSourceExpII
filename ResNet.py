@@ -39,7 +39,7 @@ class ResNet(nn.Module):
         self.stack2 = self.make_stack(128, layers[1], stride=2)
         self.stack3 = self.make_stack(256, layers[2], stride=2)
         self.stack4 = self.make_stack(512, layers[3], stride=2)
-        self.avgpool = nn.AvgPool2d(7, stride = 1)
+        self.avgpool = nn.AvgPool2d(2, stride = 1)
         self.fc1 = nn.Linear(512 * Bottleneck.expansion, feature_dim)
         self.BN = nn.BatchNorm1d(feature_dim)
         self.fc2 = nn.Linear(feature_dim, num_classes)
