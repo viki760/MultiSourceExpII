@@ -10,7 +10,7 @@ def vgg16(pretrained = False, **kwargs):
     return model
 
 class VGG(nn.Module):
-    def __init__(self, number_classes = 2000, feature_dim = 64, model_path="model.pkl"):
+    def __init__(self, num_classes = 2000, feature_dim = 16, model_path="model.pkl"):
         super(VGG, self).__init__()
         self.conv11 = nn.Conv2d(3,64,kernel_size=3,stride=1,padding=1)
         self.conv12 = nn.Conv2d(64,64,kernel_size=3,stride=1,padding=1)
@@ -26,15 +26,12 @@ class VGG(nn.Module):
         self.conv42 = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
         self.conv43 = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
         
-        self.conv51 = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
-        self.conv52 = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
-        self.conv53 = nn.Conv2d(512,512,kernel_size=3,stride=1,padding=1)
 
         self.relu = nn.ReLU(inplace = True)
         self.maxpool = nn.MaxPool2d(2, stride = 2)
-        self.fc1 = nn.Linear(512*7*7, feature_dim)
+        self.fc1 = nn.Linear(512, feature_dim)
         self.BN = nn.BatchNorm1d(feature_dim)
-        self.fc2 = nn.Linear(feature_dim, number_classes)
+        self.fc2 = nn.Linear(feature_dim, num_classes)
         
         self.init_param()
 
@@ -82,13 +79,6 @@ class VGG(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
 
-        x = self.conv51(x)
-        x = self.relu(x)
-        x = self.conv52(x)
-        x = self.relu(x)
-        x = self.conv53(x)
-        x = self.relu(x)
-        x = self.maxpool(x)
 
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
