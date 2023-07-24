@@ -28,7 +28,7 @@ def set_seed(seed: int = 42) -> None:
 
 
 class TinyImageNetTrain:
-    def __init__(self, model_name = "resnet50", number_classes = 20, path="/home/wuyanru/codes/multi_source_transfer/MultiSourceExpII/model/TinyImageNet/", loadPretrain=0):
+    def __init__(self, model_name = "resnet50", number_classes = 20, path="/home/viki/Codes/MultiSource/3/multi_source_exp/MultiSourceExpII/model/TinyImageNet/", loadPretrain=True):
         """
         Init Dataset, Model and others
         """
@@ -38,9 +38,9 @@ class TinyImageNetTrain:
         self.save_path = path
 
         if model_name == "resnet50":
-            self.model = resnet50(pretrained=(loadPretrain==1), num_classes = number_classes, model_path = path)
+            self.model = ResNet(pretrained=loadPretrain, num_classes = number_classes)
         elif model_name == "vgg16":
-            self.model = vgg16(pretrained=(loadPretrain==1), num_classes = number_classes, model_path = path)
+            self.model = vgg16(pretrained=loadPretrain, num_classes = number_classes, model_path = path)
 
         if torch.cuda.device_count() > 1:
             print("There are ", torch.cuda.device_count(), "GPUs!")
@@ -60,12 +60,12 @@ class TinyImageNetTrain:
     
 
 
-    def start_train(self, task_id, epoch=1, batch_size=128, learning_rate=0.001, batch_display=50, save_freq=10):
+    def start_train(self, task_id, epoch=1, batch_size=128, learning_rate=0.001, batch_display=1, save_freq=10):
         """
         Detail of training
         """
         self.train_dataset = TinyImageNet(type = "train", class_list=self.class_lists[task_id])
-        self.val_dataset = TinyImageNet(type = "val")
+        self.val_dataset = TinyImageNet(type = "val", class_list=self.class_lists[task_id])
 
         self.epoch_num = epoch
         self.batch_size = batch_size
@@ -83,21 +83,9 @@ class TinyImageNetTrain:
             for i_batch, sample_batch in enumerate(dataloader):
  
                 # Step.1 Load data and label
-                images_batch, labels_batch = sample_batch[0], sample_batch[1]
-                """
-                for i in range(images_batch.shape[0]):
-                    img_tmp = transforms.ToPILImage()(images_batch[i]).convert('RGB')
-                    plt.imshow(img_tmp)
-                    plt.pause(0.001)
-                """                   
+                images_batch, labels_batch = sample_batch[0], sample_batch[1]                              
                 labels_batch = torch.LongTensor(labels_batch.view(-1).numpy())
-                # if torch.cuda.is_available():
-                #     input_image = autograd.Variable(images_batch.cuda())
-                #     target_label = autograd.Variable(labels_batch.cuda(non_blocking=True))
-                # else:
-                #     input_image = autograd.Variable(images_batch)
-                #     target_label = autograd.Variable(labels_batch)
-                
+
                 input_image, target_label = images_batch.to(self.device), labels_batch.to(self.device)
                 
                 # Step.2 calculate loss
@@ -130,7 +118,7 @@ class TinyImageNetTrain:
             if epoch % save_freq == 0:
                 torch.save(self.model.state_dict(), os.path.join(self.save_path, f'task_{str(task_id)}_model.pkl'))
 
-    def train_all(self, epoch=100, batch_size=128, learning_rate=0.001, batch_display=50, save_freq=10):
+    def train_all(self, epoch=10, batch_size=128, learning_rate=0.001, batch_display=50, save_freq=10):
         for task_id in range(10):
             print(f"---------------------------------task_id:{task_id}--------------------------------")
             self.start_train(task_id, epoch, batch_size, learning_rate, batch_display, save_freq)                   
