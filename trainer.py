@@ -70,7 +70,7 @@ class Train:
             epoch_count = 0
             total_loss = 0
             total_num = len(self.dataset[data_name])
-            train_dataset, test_dataset = torch.utils.data.random_split(self.dataset[data_name], [int(0.9 * total_num), int(0.1 * total_num)])
+            train_dataset, test_dataset = torch.utils.data.random_split(self.dataset[data_name], [int(0.9 * total_num), total_num - int(0.9 * total_num)])
             dataloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True) # num_workers=8
             test_dataloader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=True)
             
@@ -132,5 +132,5 @@ class Train:
                            
 if __name__ == '__main__':
     set_seed()
-    train = Train()
+    train = Train(dataname=['usps', 'svhn', 'syn'])
     train.train_all()
